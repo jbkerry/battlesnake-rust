@@ -5,5 +5,5 @@ enum Shape {
 }
 
 struct Rectangle {
-    
+
 }
