@@ -1,3 +1,15 @@
+pub fn run_test_code() {
+    let num_one = 4;
+    let num_two = 6;
+    let result = sum_of_squares(num_one, num_two);
+    println!("The result of {num_one}^2 + {num_two}^2 is {result}");
+
+    let mut numbers = vec![3.0, 1.0, 4.0, 8.0];
+    let mut numbers2 = vec![-3.0, -0.2, -1.0, 5.0, 1.0];
+    println!("median of numbers = {}", median(&mut numbers));
+    println!("median of numbers2 = {}", median(&mut numbers2));
+}
+
 fn add(x: i32, y: i32) -> i32 {
     x + y
 }
