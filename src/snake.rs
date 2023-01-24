@@ -6,7 +6,7 @@ const ALLOWED_MOVES: [&str; 4] = ["up", "down", "left", "right"];
 
 pub struct Snake<'a> {
     head: Coord,
-    coords: HashMap<&'a str, Coord>,
+    coords: HashMap<String, Coord>,
     is_move_safe: HashMap<&'a str, bool>
 }
 
@@ -14,7 +14,6 @@ impl<'a> Snake<'a> {
     pub fn new(x: i8, y: i8) -> Self {
         let head: Coord = Coord{x, y};
         let coords = head.get_surrounding_coords();
-        // let coords: HashMap<&str, Coord> = HashMap::new();
         let mut is_move_safe: HashMap<&str, bool> = HashMap::new();
         for a_move in ALLOWED_MOVES {
             is_move_safe.insert(a_move, true);
