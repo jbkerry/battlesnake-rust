@@ -1,3 +1,5 @@
+use log::info;
+use serde_json::{json, Value};
 use std::collections::HashMap;
 
 use crate::board::{Board, Coord};
@@ -21,17 +23,18 @@ impl<'a> Snake<'a> {
         Self {head, coords, is_move_safe}
     }
 
-    pub fn determine_next_best_move(&mut self, board: &Board) -> HashMap<&str, &str> {
-        let mut api_response = HashMap::new();
+    pub fn determine_next_best_move(&mut self, board: &Board) -> Value {
+        let mut chosen_direction = String::from("up");
         self.ensure_does_not_go_out_of_bounds_or_hit_obstruction(board);
         for (direction, is_safe) in &self.is_move_safe {
             if *is_safe {
-                api_response.insert("move", *direction);
-                return api_response;
+                chosen_direction = String::from(*direction);
+                break;
             }
         }
-        api_response.insert("move", "up");
-        api_response
+
+        info!("MOVE : {chosen_direction}");
+        json!({"move": chosen_direction})
     }
 
     pub fn distance_to_food(&self, food: &Coord) -> u8 {
