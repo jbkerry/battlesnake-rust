@@ -1,13 +1,31 @@
+use serde::Deserialize;
 use std::collections::HashMap;
 
+#[derive(Deserialize, Debug)]
 pub struct Board {
     pub width: i8,
-    pub height: i8
+    pub height: i8,
+    pub food: Vec<Coord>,
+    pub hazards: Vec<Coord>,
+    pub snakes: Vec<BattleSnake>
 }
 
+#[derive(Deserialize, Debug)]
 pub struct Coord {
     pub x: i8,
     pub y: i8
+}
+
+#[derive(Deserialize, Debug)]
+pub struct BattleSnake {
+    id: String,
+    name: String,
+    health: u8,
+    body: Vec<Coord>,
+    latency: String,
+    head: Coord,
+    length: u32,
+    shout: Option<String>,
 }
 
 impl Coord {

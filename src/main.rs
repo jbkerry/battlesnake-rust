@@ -1,13 +1,34 @@
-use actix_web::{get, web, App, HttpServer};
-use serde_json::Value;
+use std::collections::HashMap;
+use actix_web::{get, post, web, App, HttpServer};
+use env_logger::Env;
+use log::info;
+use serde::Deserialize;
+use serde_json::{json, Value};
 
-use battlesnake_rust::board::Board;
-use battlesnake_rust::snake::Snake;
+use battlesnake_rust::board::{Board, Coord, BattleSnake};
+use battlesnake_rust::snake::{Snake};
+
+#[derive(Deserialize, Debug)]
+pub struct GameState {
+    game: Game,
+    turn: u32,
+    board: Board,
+    you: BattleSnake,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Game {
+    id: String,
+    ruleset: HashMap<String, Value>,
+    timeout: u32,
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init_from_env(Env::default().default_filter_or("info"));
     HttpServer::new(|| {
         App::new()
+            .service(snake_info)
             .service(handle_move)
     })
         .bind(("0.0.0.0", 8080))?
@@ -16,10 +37,24 @@ async fn main() -> std::io::Result<()> {
 }
 
 #[get("/")]
-async fn handle_move() -> web::Json<Value> {
-    let board = Board {height: 11, width: 11};
+async fn snake_info() -> web::Json<Value> {
+    info!("INFO");
+
+    let response = json!({
+        "apiversion": "1",
+        "author": "jbkerry",
+        "color": "#3300CC",
+        "head": "cute-dragon",
+        "tail": "offroad"
+    });
+
+    web::Json(response)
+}
+
+#[post("/move")]
+async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
     let mut snake = Snake::new(4, 6);
-    let response = snake.determine_next_best_move(&board);
+    let response = snake.determine_next_best_move(&move_req.board);
     web::Json(response)
 }
 
