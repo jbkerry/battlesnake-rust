@@ -7,6 +7,6 @@ RUN cargo build --release
 FROM debian:buster-slim as runtime
 
 WORKDIR /root/
-COPY --from=builder /app/target/release/rust_battlesnake /usr/local/bin/
+COPY --from=builder /app/target/release/battlesnake-rust /usr/local/bin/
 
-CMD ["rust_battlesnake"]
+CMD ["battlesnake-rust"]

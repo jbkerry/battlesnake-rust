@@ -1,9 +1,9 @@
-name: rust_package
+name: battlesnake-rust
 services:
 - dockerfile_path: Dockerfile
   github:
     branch: main
     deploy_on_push: true
-    repo: jbkerry/rust_package
+    repo: jbkerry/battlesnake-rust
   http_port: 8080
-  name: rust_package
+  name: battlesnake-rust

@@ -1,8 +1,8 @@
 use actix_web::{get, web, App, HttpServer};
 use serde_json::Value;
 
-use rust_battlesnake::board::Board;
-use rust_battlesnake::snake::Snake;
+use battlesnake_rust::board::Board;
+use battlesnake_rust::snake::Snake;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
