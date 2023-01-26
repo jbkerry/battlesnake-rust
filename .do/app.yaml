@@ -5,4 +5,5 @@ services:
     branch: main
     deploy_on_push: true
     repo: jbkerry/rust_package
+  http_port: 8080
   name: rust_package
