@@ -1,8 +1,8 @@
 use actix_web::{get, web, App, HttpServer};
 use serde_json::Value;
 
-use rust_package::board::Board;
-use rust_package::snake::Snake;
+use rust_battlesnake::board::Board;
+use rust_battlesnake::snake::Snake;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -10,7 +10,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(handle_move)
     })
-        .bind(("127.0.0.1", 8080))?
+        .bind(("0.0.0.0", 8080))?
         .run()
         .await
 }

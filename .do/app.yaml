@@ -1,0 +1,8 @@
+name: rust_package
+services:
+- dockerfile_path: Dockerfile
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: jbkerry/rust_package
+  name: rust_package
