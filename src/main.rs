@@ -5,8 +5,8 @@ use log::info;
 use serde::Deserialize;
 use serde_json::{json, Value};
 
-use battlesnake_rust::board::{Board, Coord, BattleSnake};
-use battlesnake_rust::snake::{Snake};
+use battlesnake_rust::board::{Board, Coord};
+use battlesnake_rust::snake::BattleSnake;
 
 #[derive(Deserialize, Debug)]
 pub struct GameState {
@@ -53,8 +53,7 @@ async fn snake_info() -> web::Json<Value> {
 
 #[post("/move")]
 async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
-    let mut snake = Snake::new(4, 6);
-    let response = snake.determine_next_best_move(&move_req.board);
+    let response = move_req.you.determine_next_best_move(&move_req.board);
     web::Json(response)
 }
 

@@ -1,13 +1,15 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
+use crate::snake::BattleSnake;
+
 #[derive(Deserialize, Debug)]
 pub struct Board {
-    pub width: i8,
-    pub height: i8,
-    pub food: Vec<Coord>,
-    pub hazards: Vec<Coord>,
-    pub snakes: Vec<BattleSnake>
+    width: i8,
+    height: i8,
+    food: Vec<Coord>,
+    hazards: Vec<Coord>,
+    snakes: Vec<BattleSnake>
 }
 
 #[derive(Deserialize, Debug)]
@@ -16,17 +18,6 @@ pub struct Coord {
     pub y: i8
 }
 
-#[derive(Deserialize, Debug)]
-pub struct BattleSnake {
-    id: String,
-    name: String,
-    health: u8,
-    body: Vec<Coord>,
-    latency: String,
-    head: Coord,
-    length: u32,
-    shout: Option<String>,
-}
 
 impl Coord {
     pub fn is_out_of_bounds(&self, board: &Board) -> bool {

@@ -1,34 +1,38 @@
 use log::info;
 use serde_json::{json, Value};
+use serde::Deserialize;
 use std::collections::HashMap;
 
 use crate::board::{Board, Coord};
 
 const ALLOWED_MOVES: [&str; 4] = ["up", "down", "left", "right"];
 
-pub struct Snake<'a> {
+#[derive(Deserialize, Debug)]
+pub struct BattleSnake {
+    id: String,
+    name: String,
+    health: u8,
+    body: Vec<Coord>,
+    latency: String,
     head: Coord,
-    coords: HashMap<String, Coord>,
-    is_move_safe: HashMap<&'a str, bool>
+    length: u32,
+    shout: Option<String>,
 }
 
-impl<'a> Snake<'a> {
-    pub fn new(x: i8, y: i8) -> Self {
-        let head: Coord = Coord{x, y};
-        let coords = head.get_surrounding_coords();
-        let mut is_move_safe: HashMap<&str, bool> = HashMap::new();
-        for a_move in ALLOWED_MOVES {
-            is_move_safe.insert(a_move, true);
-        }
-        Self {head, coords, is_move_safe}
-    }
-
-    pub fn determine_next_best_move(&mut self, board: &Board) -> Value {
+impl BattleSnake {
+    pub fn determine_next_best_move(&self, board: &Board) -> Value {
         let mut chosen_direction = String::from("up");
-        self.ensure_does_not_go_out_of_bounds_or_hit_obstruction(board);
-        for (direction, is_safe) in &self.is_move_safe {
-            if *is_safe {
-                chosen_direction = String::from(*direction);
+        let coords = self.head.get_surrounding_coords();
+        let mut is_move_safe: HashMap<&str, bool> = HashMap::new();
+
+        for snake_move in ALLOWED_MOVES {
+            let this_coord = coords.get(snake_move).unwrap();
+            is_move_safe.insert(snake_move, !this_coord.is_out_of_bounds(board));
+        }
+
+        for (direction, is_safe) in is_move_safe {
+            if is_safe {
+                chosen_direction = String::from(direction);
                 break;
             }
         }
@@ -39,13 +43,6 @@ impl<'a> Snake<'a> {
 
     pub fn distance_to_food(&self, food: &Coord) -> u8 {
         self.head.x.abs_diff(food.x) + self.head.y.abs_diff(food.y)
-    }
-
-    fn ensure_does_not_go_out_of_bounds_or_hit_obstruction(&mut self, board: &Board) {
-        for snake_move in ALLOWED_MOVES {
-            let coords = self.coords.get(snake_move).unwrap();
-            self.is_move_safe.insert(snake_move, !coords.is_out_of_bounds(board));
-        }
     }
 
     pub fn move_towards_location(&self, location: &Coord) -> Vec<&str> {
