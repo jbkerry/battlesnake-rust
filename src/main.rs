@@ -43,7 +43,7 @@ async fn snake_info() -> web::Json<Value> {
     let response = json!({
         "apiversion": "1",
         "author": "jbkerry",
-        "color": "#3300CC",
+        "color": "#B7410E",
         "head": "cute-dragon",
         "tail": "offroad"
     });
@@ -53,7 +53,7 @@ async fn snake_info() -> web::Json<Value> {
 
 #[post("/move")]
 async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
-    let response = move_req.you.determine_next_best_move(&move_req.board);
+    let response = move_req.you.determine_next_best_move(&move_req.board, move_req.turn);
     web::Json(response)
 }
 

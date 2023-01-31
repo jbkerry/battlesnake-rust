@@ -12,7 +12,7 @@ pub struct BattleSnake {
     id: String,
     name: String,
     health: u8,
-    body: Vec<Coord>,
+    pub body: Vec<Coord>,
     latency: String,
     head: Coord,
     length: u32,
@@ -20,14 +20,18 @@ pub struct BattleSnake {
 }
 
 impl BattleSnake {
-    pub fn determine_next_best_move(&self, board: &Board) -> Value {
+    pub fn determine_next_best_move(&self, board: &Board, turn: u32) -> Value {
         let mut chosen_direction = String::from("up");
         let coords = self.head.get_surrounding_coords();
         let mut is_move_safe: HashMap<&str, bool> = HashMap::new();
 
         for snake_move in ALLOWED_MOVES {
             let this_coord = coords.get(snake_move).unwrap();
-            is_move_safe.insert(snake_move, !this_coord.is_out_of_bounds(board));
+            let is_safe = !this_coord.is_out_of_bounds(board) && !board.obstructions().contains(this_coord);
+            is_move_safe.insert(
+                snake_move,
+                is_safe
+            );
         }
 
         for (direction, is_safe) in is_move_safe {
@@ -37,7 +41,7 @@ impl BattleSnake {
             }
         }
 
-        info!("MOVE : {chosen_direction}");
+        info!("MOVE : {turn} - {chosen_direction}");
         json!({"move": chosen_direction})
     }
 

@@ -12,7 +12,18 @@ pub struct Board {
     snakes: Vec<BattleSnake>
 }
 
-#[derive(Deserialize, Debug)]
+impl Board {
+    pub fn obstructions(&self) -> Vec<Coord> {
+        let mut obstructions = Vec::new();
+        for snake in &self.snakes {
+            obstructions.extend(&snake.body[..snake.body.len() - 1]);
+        }
+        obstructions.extend(&self.hazards);
+        obstructions
+    }
+}
+
+#[derive(Copy, Clone, Deserialize, Debug, PartialEq)]
 pub struct Coord {
     pub x: i8,
     pub y: i8
