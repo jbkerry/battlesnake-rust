@@ -44,7 +44,7 @@ async fn snake_info() -> web::Json<Value> {
         "apiversion": "1",
         "author": "jbkerry",
         "color": "#B7410E",
-        "head": "cute-dragon",
+        "head": "sleepy",
         "tail": "offroad"
     });
 
