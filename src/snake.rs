@@ -27,10 +27,9 @@ impl BattleSnake {
 
         for snake_move in ALLOWED_MOVES {
             let this_coord = coords.get(snake_move).unwrap();
-            let is_safe = !this_coord.is_out_of_bounds(board) && !board.obstructions().contains(this_coord);
             is_move_safe.insert(
                 snake_move,
-                is_safe
+                this_coord.is_free(board)
             );
         }
 
