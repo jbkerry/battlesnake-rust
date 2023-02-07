@@ -33,15 +33,37 @@ impl BattleSnake {
             );
         }
 
-        for (direction, is_safe) in is_move_safe {
-            if is_safe {
-                chosen_direction = String::from(direction);
-                break;
+        let mut other_longer_snake_heads: Vec<Coord> = Vec::new();
+        for snake in &board.snakes {
+            if snake.name != self.name && snake.length >= self.length {
+                other_longer_snake_heads.push(snake.head);
             }
         }
 
-        info!("MOVE : {turn} - {chosen_direction}");
-        json!({"move": chosen_direction})
+        let lowest_possible_collisions: u8 = 5;
+        let mut direction = "down";
+        for (k, v) in is_move_safe.iter().filter(|&(k, v)| *v) {
+            let surrounding_squares = coords.get(*k).unwrap().get_surrounding_coords();
+            let mut counter: u8 = 0;
+            for (_, v) in surrounding_squares.iter() {
+                if other_longer_snake_heads.contains(v) {
+                    counter += 1;
+                }
+            }
+            if counter < lowest_possible_collisions {
+                direction = *k;
+            }
+        }
+
+        // for (direction, is_safe) in is_move_safe {
+        //     if is_safe {
+        //         chosen_direction = String::from(direction);
+        //         break;
+        //     }
+        // }
+
+        info!("MOVE : {turn} - {direction}");
+        json!({"move": direction})
     }
 
     pub fn distance_to_food(&self, food: &Coord) -> u8 {

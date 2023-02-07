@@ -9,7 +9,7 @@ pub struct Board {
     height: i8,
     food: Vec<Coord>,
     hazards: Vec<Coord>,
-    snakes: Vec<BattleSnake>
+    pub snakes: Vec<BattleSnake>
 }
 
 impl Board {
