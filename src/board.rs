@@ -7,7 +7,7 @@ use crate::snake::BattleSnake;
 pub struct Board {
     width: i8,
     height: i8,
-    food: Vec<Coord>,
+    pub food: Vec<Coord>,
     hazards: Vec<Coord>,
     pub snakes: Vec<BattleSnake>
 }
