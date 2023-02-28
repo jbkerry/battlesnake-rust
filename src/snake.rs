@@ -40,7 +40,7 @@ impl BattleSnake {
             }
         }
         info!("Number of longer snake heads = {}", other_longer_snake_heads.len());
-        let lowest_possible_collisions: u8 = 5;
+        let mut lowest_possible_collisions: u8 = 5;
         let mut direction = "down";
         for (k, v) in is_move_safe.iter().filter(|&(k, v)| *v) {
             let surrounding_squares = coords.get(*k).unwrap().get_surrounding_coords();
@@ -53,6 +53,7 @@ impl BattleSnake {
             info!("{} got a count of {}", k, counter);
             if counter < lowest_possible_collisions {
                 direction = *k;
+                lowest_possible_collisions = counter;
             }
         }
 
