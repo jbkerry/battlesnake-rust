@@ -1,4 +1,4 @@
-use log::info;
+use log::{info, warn};
 use rand::seq::IteratorRandom;
 use serde_json::{json, Value};
 use serde::Deserialize;
@@ -34,15 +34,23 @@ impl BattleSnake {
             );
         }
 
+        let num_safe_moves = is_move_safe.values().filter(|&v| *v).count();
+        if num_safe_moves == 0 {
+            warn!("No safe moves! Moving down");
+            info!("MOVE : {turn} - down");
+            return json!({"move": "down"})
+        }
+
+
+        // choose least probably detrimental head-on collision
+
         let mut other_longer_snake_heads: Vec<Coord> = Vec::new();
         for snake in &board.snakes {
             if snake.name != self.name && snake.length >= self.length {
                 other_longer_snake_heads.push(snake.head);
             }
         }
-        info!("Number of longer snake heads = {}", other_longer_snake_heads.len());
-        // let mut lowest_possible_collisions: u8 = 5;
-        // let mut direction = "down";
+
         let mut safety_of_moves = vec![];
         for (k, v) in is_move_safe.iter().filter(|&(k, v)| *v) {
             let surrounding_squares = coords.get(*k).unwrap().get_surrounding_coords();
@@ -54,22 +62,44 @@ impl BattleSnake {
             }
             let this_move_safety: (&str, u8) = (*k, counter);
             safety_of_moves.push(this_move_safety);
-            // info!("{} got a count of {}", k, counter);
-            // if counter < lowest_possible_collisions {
-            //     direction = *k;
-            //     lowest_possible_collisions = counter;
-            // }
         }
         let safest_minimum = safety_of_moves.iter().min_by_key(|&&x| x.1).unwrap();
-        let mut safest_moves: HashSet<&str> = safety_of_moves.iter()
+        let safest_moves: HashSet<&str> = safety_of_moves.iter()
             .filter(|&&x| x.1 == safest_minimum.1)
             .map(|&x| x.0).collect();
-        // for (direction, is_safe) in is_move_safe {
-        //     if is_safe {
-        //         chosen_direction = String::from(direction);
-        //         break;
-        //     }
-        // }
+
+
+        // determine move towards largest open space
+
+        let mut most_free: Vec<(&str, u32)> = vec![];
+        for direction in &safest_moves {
+            let mut available_branch_moves: Vec<Coord> = vec![*coords.get(*direction).unwrap()];
+            let mut free_moves: u32 = 0;
+            for next_move in available_branch_moves.clone() {
+                free_moves += 1;
+                if free_moves > self.length {
+                    break;
+                }
+                for coord in next_move.get_surrounding_coords().values() {
+                    if available_branch_moves.contains(coord) {
+                        continue
+                    }
+                    let occupied: bool = board.obstructions().contains(coord);
+                    if !occupied && !coord.is_out_of_bounds(board) {
+                        available_branch_moves.push(*coord);
+                    }
+                }
+            }
+            most_free.push((direction, free_moves));
+        }
+        let max_free = most_free.iter().max_by_key(|&&x| x.1).unwrap();
+        let mut safest_moves: HashSet<&str> = most_free.iter()
+            .filter(|&&x| x.1 == max_free.1)
+            .map(|&x| x.0).collect();
+
+
+        // seek out food
+
         if board.food.len() > 0 {
             let mut sorted_food = board.food.clone();
             sorted_food.sort_by(
@@ -78,14 +108,15 @@ impl BattleSnake {
             );
             let nearest_food = &sorted_food[0];
             let moves_towards_food = self.move_towards_location(nearest_food);
-            // let safest_moves_with_food: HashSet<_> = safest_moves.intersection(&moves_towards_food).collect();
-             let safest_moves_with_food: HashSet<&str> = &safest_moves & &moves_towards_food;
+            let safest_moves_with_food: HashSet<&str> = &safest_moves & &moves_towards_food;
             if safest_moves_with_food.len() > 0 {
                 safest_moves = safest_moves_with_food
             }
         }
+
         let mut rng = rand::thread_rng();
         let direction = safest_moves.into_iter().choose(&mut rng).unwrap();
+
         info!("MOVE : {turn} - {direction}");
         json!({"move": direction})
     }
