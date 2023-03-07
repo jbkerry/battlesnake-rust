@@ -75,8 +75,12 @@ impl BattleSnake {
         for direction in &safest_moves {
             let mut available_branch_moves: Vec<Coord> = vec![*coords.get(*direction).unwrap()];
             let mut free_moves: u32 = 0;
-            for next_move in available_branch_moves.clone() {
+            for idx in 0..100 {
                 free_moves += 1;
+                let next_move = match available_branch_moves.get(idx) {
+                    Some(i) => i,
+                    None => break,
+                };
                 if free_moves > self.length {
                     break;
                 }
@@ -92,6 +96,7 @@ impl BattleSnake {
             }
             most_free.push((direction, free_moves));
         }
+        info!("Free moves = {:?}", most_free);
         let max_free = most_free.iter().max_by_key(|&&x| x.1).unwrap();
         let mut safest_moves: HashSet<&str> = most_free.iter()
             .filter(|&&x| x.1 == max_free.1)
