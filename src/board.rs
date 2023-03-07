@@ -40,11 +40,14 @@ impl Coord {
     }
 
     pub fn get_surrounding_coords(&self) -> HashMap<String, Coord> {
-        let mut surrounding: HashMap<String, Coord> = HashMap::new();
-        surrounding.insert(String::from("right"), Coord{x: self.x + 1, y: self.y});
-        surrounding.insert(String::from("left"), Coord{x: self.x - 1, y: self.y});
-        surrounding.insert(String::from("up"), Coord{x: self.x, y: self.y + 1});
-        surrounding.insert(String::from("down"), Coord{x: self.x, y: self.y - 1});
+        let surrounding: HashMap<String, Coord> = vec![
+            (String::from("right"), Coord{x: self.x + 1, y: self.y}),
+            (String::from("left"), Coord{x: self.x - 1, y: self.y}),
+            (String::from("up"), Coord{x: self.x, y: self.y + 1}),
+            (String::from("down"), Coord{x: self.x, y: self.y - 1}),
+        ]
+            .into_iter()
+            .collect();
         
         surrounding
     }
