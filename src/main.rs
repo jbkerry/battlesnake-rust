@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use actix_web::{get, post, web, App, HttpServer};
 use env_logger::Env;
@@ -13,7 +14,7 @@ pub struct GameState {
     game: Game,
     turn: u32,
     board: Board,
-    you: BattleSnake,
+    you: RefCell<BattleSnake>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -53,7 +54,7 @@ async fn snake_info() -> web::Json<Value> {
 
 #[post("/move")]
 async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
-    let response = move_req.you.determine_next_best_move(&move_req.board, move_req.turn);
+    let response = move_req.you.borrow_mut().determine_next_best_move(&move_req.board, move_req.turn);
     web::Json(response)
 }
 

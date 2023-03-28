@@ -18,31 +18,56 @@ pub struct BattleSnake {
     head: Coord,
     length: u32,
     shout: Option<String>,
+    #[serde(default = "empty_hashmap")]
+    is_move_safe: HashMap<String, bool>,
+}
+
+fn empty_hashmap() -> HashMap<String, bool> {
+    vec![
+        (String::from("up"), false),
+        (String::from("down"), false),
+        (String::from("left"), false),
+        (String::from("right"), false),
+    ]
+        .into_iter()
+        .collect()
 }
 
 impl BattleSnake {
-    pub fn determine_next_best_move(&self, board: &Board, turn: u32) -> Value {
-        let mut chosen_direction = String::from("up");
-        let coords = self.head.get_surrounding_coords();
-        let mut is_move_safe: HashMap<&str, bool> = HashMap::new();
-
+    fn construct_safe_moves(&mut self, coords: &HashMap<String, Coord>, board: &Board) -> () {
+        // let mut is_move_safe: HashMap<&str, bool> = HashMap::new();
         for snake_move in ALLOWED_MOVES {
+        // for snake_move in self.is_move_safe.keys() {
             let this_coord = coords.get(snake_move).unwrap();
-            is_move_safe.insert(
-                snake_move,
-                this_coord.is_free(board)
-            );
+            let is_free: bool = this_coord.is_free(board);
+            if is_free {
+                self.is_move_safe.insert(
+                    snake_move.to_string(),
+                    is_free
+                );
+            }
         }
+    }
 
-        let num_safe_moves = is_move_safe.values().filter(|&v| *v).count();
-        if num_safe_moves == 0 {
+    fn num_safe_moves(&self, safe_moves: &HashMap<String, bool>) -> Option<usize> {
+        let num_safe_moves = safe_moves.values().filter(|&v| *v).count();
+        match num_safe_moves {
+            0 => None,
+            value => Some(value),
+        }
+    }
+
+    pub fn determine_next_best_move(&mut self, board: &Board, turn: u32) -> Value {
+        let coords = self.head.get_surrounding_coords();
+        self.construct_safe_moves(&coords, board);
+
+        if self.num_safe_moves(&self.is_move_safe).is_none() {
             warn!("No safe moves! Moving down");
             info!("MOVE : {turn} - down");
             return json!({"move": "down"})
         }
 
-
-        // choose least probably detrimental head-on collision
+        // choose least probable detrimental head-on collision
 
         let mut other_longer_snake_heads: Vec<Coord> = Vec::new();
         for snake in &board.snakes {
@@ -52,15 +77,15 @@ impl BattleSnake {
         }
 
         let mut safety_of_moves = vec![];
-        for (k, v) in is_move_safe.iter().filter(|&(k, v)| *v) {
-            let surrounding_squares = coords.get(*k).unwrap().get_surrounding_coords();
+        for (k, v) in self.is_move_safe.iter().filter(|&(k, v)| *v) {
+            let surrounding_squares = coords.get(k).unwrap().get_surrounding_coords();
             let mut counter: u8 = 0;
             for (_, v) in surrounding_squares.iter() {
                 if other_longer_snake_heads.contains(v) {
                     counter += 1;
                 }
             }
-            let this_move_safety: (&str, u8) = (*k, counter);
+            let this_move_safety: (&str, u8) = (k, counter);
             safety_of_moves.push(this_move_safety);
         }
         let safest_minimum = safety_of_moves.iter().min_by_key(|&&x| x.1).unwrap();
