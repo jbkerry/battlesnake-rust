@@ -6,10 +6,9 @@ use log::info;
 use serde::Deserialize;
 use serde_json::{json, Value};
 
-use battlesnake_rust::board::{Board, Coord};
-use battlesnake_rust::snake::BattleSnake;
+use battlesnake_rust::{Board, BattleSnake};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct GameState {
     game: Game,
     turn: u32,
@@ -17,7 +16,7 @@ pub struct GameState {
     you: RefCell<BattleSnake>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct Game {
     id: String,
     ruleset: HashMap<String, Value>,

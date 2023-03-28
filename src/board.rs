@@ -1,16 +1,6 @@
-use serde::Deserialize;
 use std::collections::HashMap;
 
-use crate::snake::BattleSnake;
-
-#[derive(Deserialize, Debug)]
-pub struct Board {
-    width: i8,
-    height: i8,
-    pub food: Vec<Coord>,
-    hazards: Vec<Coord>,
-    pub snakes: Vec<BattleSnake>
-}
+use crate::{Board, Coord};
 
 impl Board {
     pub fn obstructions(&self) -> Vec<Coord> {
@@ -22,13 +12,6 @@ impl Board {
         obstructions
     }
 }
-
-#[derive(Copy, Clone, Deserialize, Debug, PartialEq)]
-pub struct Coord {
-    pub x: i8,
-    pub y: i8
-}
-
 
 impl Coord {
     pub fn is_out_of_bounds(&self, board: &Board) -> bool {

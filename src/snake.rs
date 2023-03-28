@@ -1,37 +1,12 @@
 use log::{info, warn};
 use rand::seq::IteratorRandom;
 use serde_json::{json, Value};
-use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 
-use crate::board::{Board, Coord};
+use crate::{Board, Coord, BattleSnake};
 
 const ALLOWED_MOVES: [&str; 4] = ["up", "down", "left", "right"];
 
-#[derive(Deserialize, Debug)]
-pub struct BattleSnake {
-    id: String,
-    name: String,
-    health: u8,
-    pub body: Vec<Coord>,
-    latency: String,
-    head: Coord,
-    length: u32,
-    shout: Option<String>,
-    #[serde(default = "empty_hashmap")]
-    is_move_safe: HashMap<String, bool>,
-}
-
-fn empty_hashmap() -> HashMap<String, bool> {
-    vec![
-        (String::from("up"), false),
-        (String::from("down"), false),
-        (String::from("left"), false),
-        (String::from("right"), false),
-    ]
-        .into_iter()
-        .collect()
-}
 
 impl BattleSnake {
     fn construct_safe_moves(&mut self, coords: &HashMap<String, Coord>, board: &Board) -> () {
@@ -77,7 +52,7 @@ impl BattleSnake {
         }
 
         let mut safety_of_moves = vec![];
-        for (k, v) in self.is_move_safe.iter().filter(|&(k, v)| *v) {
+        for (k, _) in self.is_move_safe.iter().filter(|&(_, v)| *v) {
             let surrounding_squares = coords.get(k).unwrap().get_surrounding_coords();
             let mut counter: u8 = 0;
             for (_, v) in surrounding_squares.iter() {
