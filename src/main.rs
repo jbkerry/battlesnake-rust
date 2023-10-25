@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_variables)]
 
 use std::cell::RefCell;
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::env;
 use actix_web::{get, post, web, App, HttpServer, HttpResponse};
 use env_logger::Env;
@@ -65,15 +65,6 @@ async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
 
 #[post("/end")]
 async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
-    let snakes = &end_req.board.snakes;
-    let mut alive_snakes = snakes.iter()
-        .filter(|s| s.health > 0)
-        .collect::<VecDeque<&BattleSnake>>();
-    let winner = match alive_snakes.pop_front() {
-        Some(s) => &s.name,
-        None => "No winner",
-    };
-    let client = reqwest::Client::new();
     let ntfy_server = match env::var("NTFY_SERVER") {
         Ok(val) => val,
         Err(_) => {
@@ -81,7 +72,15 @@ async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
             return HttpResponse::NoContent().finish()
         }
     };
+
+    let snakes = &end_req.board.snakes;
+    let winner = match snakes.iter().next() {
+        Some(s) => &s.name,
+        None => "No winner",
+    };
     let game_mode = &end_req.game.map;
+
+    let client = reqwest::Client::new();
     match client.post(format!("https://ntfy.sh/{ntfy_server}"))
         .body(format!("Winner was {}; game mode was {}", winner, game_mode))
         .send().
