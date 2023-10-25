@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 RUN cargo build --release
 
-FROM debian:bookworm-slim as runtime
+FROM debian:bullseye-slim as runtime
 
 WORKDIR /root/
 COPY --from=builder /app/target/release/battlesnake-rust /usr/local/bin/
