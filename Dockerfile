@@ -6,6 +6,7 @@ COPY . .
 RUN cargo build --release
 
 FROM debian:bullseye-slim as runtime
+RUN apt update && apt install -y ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /app/target/release/battlesnake-rust /usr/local/bin/
