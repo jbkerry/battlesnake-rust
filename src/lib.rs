@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_variables)]
+
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -10,14 +12,14 @@ pub struct Board {
     height: i8,
     food: Vec<Coord>,
     hazards: Vec<Coord>,
-    snakes: Vec<BattleSnake>
+    pub snakes: Vec<BattleSnake>
 }
 
 #[derive(Deserialize)]
 pub struct BattleSnake {
     id: String,
-    name: String,
-    health: u8,
+    pub name: String,
+    pub health: u8,
     body: Vec<Coord>,
     latency: String,
     head: Coord,
