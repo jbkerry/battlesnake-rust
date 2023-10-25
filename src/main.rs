@@ -25,6 +25,7 @@ pub struct Game {
     id: String,
     ruleset: HashMap<String, Value>,
     timeout: u32,
+    map: String,
 }
 
 #[actix_web::main]
@@ -80,8 +81,9 @@ async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
             return HttpResponse::NoContent().finish()
         }
     };
+    let game_mode = &end_req.game.map;
     match client.post(format!("https://ntfy.sh/{ntfy_server}"))
-        .body(format!("Winner was {}", winner))
+        .body(format!("Winner was {}; game mode was {}", winner, game_mode))
         .send().
         await {
             Ok(_) => {},
@@ -89,5 +91,3 @@ async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
     }
     HttpResponse::Ok().finish()
 }
-
-
