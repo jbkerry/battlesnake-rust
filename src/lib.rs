@@ -17,7 +17,7 @@ pub struct Board {
 
 #[derive(Deserialize)]
 pub struct BattleSnake {
-    id: String,
+    pub id: String,
     pub name: String,
     pub health: u8,
     body: Vec<Coord>,

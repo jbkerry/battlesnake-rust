@@ -36,6 +36,7 @@ async fn main() -> std::io::Result<()> {
             .service(snake_info)
             .service(handle_move)
             .service(handle_end)
+            .service(handle_start)
     })
         .bind(("0.0.0.0", 8080))?
         .run()
@@ -63,30 +64,48 @@ async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
     web::Json(response)
 }
 
+#[post("/start")]
+async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
+    let snakes = &start_req.board.snakes
+        .iter()
+        .map(|s| &s.name)
+        .collect::<Vec<&String>>();
+    let game_id = &start_req.game.id;
+    let game_mode = &start_req.game.map;
+    let msg = format!("Game ID {} mode is {}. Snakes are {:?}", game_id, game_mode, snakes);
+    if let Err(err) = ntfy_publish(msg).await {
+        error!("Failed to post due to: {}", err)
+    }
+    HttpResponse::Ok().finish()
+}
+
 #[post("/end")]
 async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
-    let ntfy_server = match env::var("NTFY_SERVER") {
-        Ok(val) => val,
-        Err(_) => {
-            error!("NTFY_SERVER env var not set");
-            return HttpResponse::NoContent().finish()
-        }
-    };
-
     let snakes = &end_req.board.snakes;
     let winner = match snakes.iter().next() {
         Some(s) => &s.name,
         None => "No winner",
     };
-    let game_mode = &end_req.game.map;
+    let game_id = &end_req.game.id;
+    let msg = format!("Game ID {} winner was {}", game_id, winner);
+    if let Err(err) = ntfy_publish(msg).await {
+        error!("Failed to post due to: {}", err)
+    }
+    HttpResponse::Ok().finish()
+}
+
+async fn ntfy_publish(msg: String) -> Result<(), String> {
+    let ntfy_server = match env::var("NTFY_SERVER") {
+        Ok(val) => val,
+        Err(_) => return Err(String::from("NTFY_SERVER env var not set"))
+    };
 
     let client = reqwest::Client::new();
     match client.post(format!("https://ntfy.sh/{ntfy_server}"))
-        .body(format!("Winner was {}; game mode was {}", winner, game_mode))
-        .send().
-        await {
-            Ok(_) => {},
-            Err(err) => error!("Failed to post due to: {}", err)
+        .body(msg)
+        .send()
+        .await {
+        Ok(_) => Ok(()),
+        Err(err) => Err(err.to_string())
     }
-    HttpResponse::Ok().finish()
 }
