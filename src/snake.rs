@@ -96,7 +96,7 @@ impl BattleSnake {
             }
             most_free.push((direction, free_moves));
         }
-        info!("Free moves = {:?}", most_free);
+        // info!("Free moves = {:?}", most_free);
         let max_free = most_free.iter().max_by_key(|&&x| x.1).unwrap();
         let mut safest_moves: HashSet<&str> = most_free.iter()
             .filter(|&&x| x.1 == max_free.1)

@@ -26,6 +26,7 @@ pub struct Game {
     ruleset: HashMap<String, Value>,
     timeout: u32,
     map: String,
+    source: String,
 }
 
 #[actix_web::main]
@@ -66,6 +67,9 @@ async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
 
 #[post("/start")]
 async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
+    if &start_req.game.source == "league" {
+        return HttpResponse::Ok().finish();
+    }
     let snakes = &start_req.board.snakes
         .iter()
         .map(|s| &s.name)
@@ -74,13 +78,16 @@ async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
     let game_mode = &start_req.game.map;
     let msg = format!("Game ID {} mode is {}. Snakes are {:?}", game_id, game_mode, snakes);
     if let Err(err) = ntfy_publish(msg).await {
-        error!("Failed to post due to: {}", err)
+        error!("Failed to post due to: {}", err);
     }
     HttpResponse::Ok().finish()
 }
 
 #[post("/end")]
 async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
+    if &end_req.game.source == "league" {
+        return HttpResponse::Ok().finish();
+    }
     let snakes = &end_req.board.snakes;
     let winner = match snakes.iter().next() {
         Some(s) => &s.name,
@@ -89,7 +96,7 @@ async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
     let game_id = &end_req.game.id;
     let msg = format!("Game ID {} winner was {}", game_id, winner);
     if let Err(err) = ntfy_publish(msg).await {
-        error!("Failed to post due to: {}", err)
+        error!("Failed to post due to: {}", err);
     }
     HttpResponse::Ok().finish()
 }
