@@ -20,7 +20,7 @@ pub struct GameState {
     you: RefCell<BattleSnake>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Game {
     id: String,
     ruleset: HashMap<String, Value>,
@@ -76,7 +76,11 @@ async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
         .collect::<Vec<&String>>();
     let game_id = &start_req.game.id;
     let game_mode = &start_req.game.map;
-    let msg = format!("Game ID {} mode is {}. Snakes are {:?}", game_id, game_mode, snakes);
+    let game_source = &start_req.game.source;
+    let msg = format!(
+        "Game ID {} mode is {}; source is {}. Snakes are {:?}",
+        game_id, game_mode, game_source, snakes
+    );
     if let Err(err) = ntfy_publish(msg).await {
         error!("Failed to post due to: {}", err);
     }
