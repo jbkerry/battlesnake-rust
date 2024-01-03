@@ -67,7 +67,7 @@ async fn handle_move(move_req: web::Json<GameState>) -> web::Json<Value> {
 
 #[post("/start")]
 async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
-    if &start_req.game.source == "league" {
+    if &start_req.game.source != "custom" {
         return HttpResponse::Ok().finish();
     }
     let snakes = &start_req.board.snakes
@@ -76,11 +76,7 @@ async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
         .collect::<Vec<&String>>();
     let game_id = &start_req.game.id;
     let game_mode = &start_req.game.map;
-    let game_source = &start_req.game.source;
-    let msg = format!(
-        "Game ID {} mode is {}; source is {}. Snakes are {:?}",
-        game_id, game_mode, game_source, snakes
-    );
+    let msg = format!("Game ID {} mode is {}. Snakes are {:?}", game_id, game_mode, snakes);
     if let Err(err) = ntfy_publish(msg).await {
         error!("Failed to post due to: {}", err);
     }
@@ -89,7 +85,7 @@ async fn handle_start(start_req: web::Json<GameState>) -> HttpResponse {
 
 #[post("/end")]
 async fn handle_end(end_req: web::Json<GameState>) -> HttpResponse {
-    if &end_req.game.source == "league" {
+    if &end_req.game.source != "custom" {
         return HttpResponse::Ok().finish();
     }
     let snakes = &end_req.board.snakes;
